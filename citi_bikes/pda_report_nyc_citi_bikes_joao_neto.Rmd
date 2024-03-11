@@ -1,0 +1,368 @@
+---
+title: "NYC Citi Bikes"
+output:
+  html_document:
+    df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(tsibble)
+library(tsibbledata)
+library(feasts)
+library(lubridate)
+library(leaflet)
+```
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+library(tsibbledata)
+nyc_bikes_df <- nyc_bikes
+```
+
+# 1. Documentation
+
+#### **1.1. Domain knowledge**
+
+Lauched in May of 2013 and available 24 hours/day, 7 days/week, 365
+days/year, the Citi Bike is New York City's bike share system and the
+largest in the nation having thousands of bikes, hundreds of stations
+and in 2018 registed 143,000 members.
+
+With different type of users that could be a "Customer" has purchased
+either a 24-hour or 3-day pass, and a "Subscriber" has purchased an
+annual subscription, the bikes can be unlocked from one station and
+returned to any other station in the system. People use the Citi Bike
+services to commute to work or school, run errands, get to appointments
+or social engagements, and more.
+
+#### **1.2. Business requirements**
+
+1.  Understand the business model of the company;
+2.  Investigated variables of interest in dataset;
+3.  Make relevant questions for the business model that our dataset can
+    answer. Questions that can help the company to know where they are
+    but for where they should go too;
+4.  Make visualizations to help to analyze the results obtained, take
+    conclusions and think how those results could be usefull for the
+    company.
+
+#### **1.3. Business processes and data flow**
+
+![](images/data_flow_ddiagram.jpg)
+
+#### **1.4. Data visualisation as a tool for decision-making**
+
+The main measure that guides the NYC Citi Bikes business is the number of users 
+that the company has. The amount of  users (subscribers or simple users) will
+dictate the revenues of the company, for that it is important to know about the 
+tendencies and preferences of users to offer the best service and experience.
+
+This report has as propose answer 3 main questions:
+
+-   **When is the peak use of NYC Citi Bikes services?**
+
+    To know the seasons/months with more demand can help the company to
+    how could manage/adjust their resources like the number of bikes
+    available, or the number of people working in certain positions.
+
+-   **Who is the typical user of NYC Citi Bikes services?**
+
+    To Knows the profile of clients it is relevant to adjust the
+    services to fidelize the actual clients, but at the same time
+    looking to bring new type of costumers. This could be involve
+    advertisements more efficient, or has additional services like
+    insurances to the people fell more secure.
+
+-   **Which travel is most common between stations?**
+
+    Maintenance of the bikes should have special attention because
+    accidents that happen for a lack of maintenance could bring bad
+    reputation for the company and extra expenses with insurances or
+    medical assistance. For that reason know which travel happen most it
+    is important to have more resources (maintenance points, information
+    etc) in the stations with more demand.
+
+#### **1.5. Data types**
+
+The different types of variables (from a total of 12 variables) that
+there are in this dataset are:
+
+-   factor : has character values.
+-   datetime: has date and time as values.
+-   numeric: has number as values (integer or decimals).
+
+A more detailed information could be visible below:
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+glimpse(nyc_bikes_df)
+```
+
+#### **1.6. Data quality and data bias**
+
+The source of this dataset is open source, being known and trustworthy.
+
+There is a significant difference between male and female users, as well
+as a difference between the number of subscribers and customers. Since
+it is a sample, to what extent the algorithm that generates the sample
+may be a case of gender bias, or simply the service is mostly used by
+men. Not forgetting that this is a sample limited to 10 bicycles, and
+therefore it may be limiting the dispersion of the sample data.
+
+The dataset, according the article 4 of GDPR (General Data Protection
+Regulation), do not have data that could be considered like personal
+data that allow to identify a specific person. About sensible data, tehe
+dataset there are not data that are on these group of data, once the
+gender information by it self does not give information about person's
+sex life and a person's sexual orientation.
+
+# 2. Data cleaning
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
+summary(nyc_bikes_df)
+```
+
+In general the data is clean. Not all variables were used to answer the
+questions proposed.
+
+Were created 3 new columns, 2 of them from the variable *start_time*,
+there were:
+
+-   ***month*****,** has the month that the bike was hired (January to
+    December);
+-   ***week_day***, has the week day that the bike was hired (Monday to
+    Sunday); and
+-   ***station_travel***, join the variables *start_station* and
+    *end_station* to this way have in just one variable which station
+    the hires started and which station the hires stopped.
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+nyc_bikes_df_month_weekday <- nyc_bikes_df %>% 
+  mutate(month          = month(start_time, 
+                                label = TRUE),
+         week_day       = wday(start_time, 
+                               label = TRUE)) %>% 
+  mutate(station_travel = str_c(start_station, 
+                                end_station, 
+                                sep = " - "), 
+         .after = "end_station")
+```
+
+The variable gender was used and just were considered observations with
+values "Male" and "Female", "Unknown" values were not considered by do
+not give relevant information.
+
+The variable *birth_age* has a value of 1887 that is a unexpected value.
+For this reason if in the further studies the variable *birth_age* was
+managed, this value should not be considered.
+
+None NA value was deleted because it could delete useful observations.
+The NA values were managed (not considered) specifically when the
+interest variables were studied and used to make visualizations.
+
+# 3. Data visualisation
+
+First, I investigated variables of interest with simple single-variable
+distribution plots. Then I plotted variables of interest to the business
+against each other to see if any patterns were present in the data.
+After selecting key visualizations I ensured these were clearly
+portraying the message I wanted to convey, were aesthetically pleasing,
+as well as accurate and not misleading. All visualizations were made in
+RStudio using the `ggplot` package.
+
+### **Number of bikes per month**
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+## Bikes hired month per month during 2018
+nyc_bikes_df_month_weekday %>%
+  index_by(month) %>% 
+  summarise(count = n()) %>% 
+  ggplot(aes(x = month, y = count)) +
+  geom_point(size = 3) + 
+  geom_line(group = 1, size = 1) +
+  labs(title = "Year 2018",
+       subtitle = "",
+       x = NULL,
+       y = "bike reting per month") +
+  geom_text(aes(label = count),  size = 3, vjust = -0.9, hjust = 1.2) +
+  theme_minimal() +
+  theme(panel.grid.minor.y = element_blank()) +
+  geom_vline(xintercept = seq(3, 12, 3),
+            linetype    = "longdash",
+            size = 0.8) +
+  annotate("text", 
+           x     = c(1.5, 4.5, 7.5, 10.5), 
+           y     = 850, 
+           label = c("Winter", "Spring", "Summer", "Autumn"),
+           size  = c(4, 4, 4, 4)
+           )
+```
+
+This line graph shows the tend of total users per each month of the year
+of 2018. The months that have more demand are the warmer months, it
+means during the spring and the summer, the weather conditions could
+influence the number of users of bikes.
+
+The relation between the number of users per each month (or seasons)
+could helps to know the trend of users for eventually make less or more
+bikes available depending on the time of year, if there are less demand
+should have less bikes available in streets to the bikes don't get
+damaged.
+
+### **Bikes hired per week day during a year by Type of customer**
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+#bikes hired per week day (Monday to Sunday) by type of customer
+nyc_bikes_df_month_weekday %>%  
+  index_by(week_day) %>% 
+  group_by(type) %>% 
+  summarise(count = n()) %>% 
+  ggplot() +
+  aes(x = week_day,
+      y = count,
+      fill = type) +
+  geom_col() +
+  theme_minimal() +
+  scale_fill_manual(values = c("grey70", 
+                               "seagreen")) +
+  geom_text(aes(label = count),
+            size = 4,
+            position = position_stack(vjust = 0.5),
+            vjust = -0.00) +
+  labs(title    = "year 2018",
+       x        = NULL) +
+  theme(panel.grid.minor.y = element_blank(),
+        legend.position    = "bottom",
+        legend.title       = element_blank()
+        )
+```
+
+This column bar graph shows the number of users (per type of user)
+during 2018 per week day. It is possible take some conclusions like:
+
+-   in general the most users are subscribers;
+-   during the workdays (Monday to Friday) the number of subscribe users
+    are higher than the weekend; and
+-   during the weekend it is when the number of costumer users is
+    higher.
+
+This type of information could help to identify that the most users of
+the services are people that use bikes to commute to work. Beyond that,
+know who are the most user of the services could be relevant to offer
+services that satisfy that people offering for example insurances that
+make people fells more secure to continue using the bikes.
+
+### **Distribution by gender per month**
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+nyc_bikes_df_month_weekday %>% 
+  index_by(month) %>% 
+  group_by(gender) %>% 
+  summarise(n_hires = n()) %>% 
+  filter(gender %in% c("Male", "Female")) %>% 
+  ggplot() +
+  aes(x = month, 
+      y = n_hires, 
+      fill = gender) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = n_hires), 
+            size = 3, 
+            vjust = -0.3) +
+  theme(strip.text = element_text(face = "bold")) +
+  facet_wrap(~gender) +
+  scale_fill_manual(values = c(
+    "Male"   = "steelblue",
+    "Female" = "#E69F00"
+  )) +
+  labs(title    = "Year 2018",
+       x        = NULL,
+       y        = "count") +
+  theme_minimal() +
+  theme(strip.text = element_text(face = "bold"),
+        panel.grid.major.y  = element_line(color = "grey80"),
+        panel.grid.minor.y  = element_line(color = "grey80"),
+        panel.grid.major.x  = element_blank(),
+        panel.grid.minor.x  = element_blank()
+  )
+```
+
+This column bar graph shows the number of users per gender per each
+month of 2018. It is visible that more men use bikes than women, and
+that information help to know where more efforts could be done to
+increase the number of users (different marketing, advertisements for
+different gender) and hence increase the revenues of the company.
+
+### **Travel that happened most per month between stations**
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+nyc_bikes_df_month_weekday %>% 
+  index_by(month) %>% 
+  group_by(station_travel) %>% 
+  summarise(count_travels = n()) %>% 
+  ungroup() %>% 
+  index_by(month) %>% 
+  slice_max(count_travels, 
+            n = 1, 
+            with_ties = FALSE) %>% 
+  ggplot() +
+  aes(x = month, y = count_travels, fill = station_travel) +
+  geom_col() +
+  geom_text(aes(label = station_travel), size = 4, angle = 90, position = position_stack(vjust = 0.5)) +
+  geom_text(aes(label = count_travels), size = 4, vjust = -0.3) +
+  labs(
+    title = "Year 2018",
+    x = NULL,
+    y = NULL,
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c(
+    "3186 - 3203" = "#ea8a98",
+    "3203 - 3186" = "#9bbf8d",
+    "3213 - 3186" = "lightblue",
+    "3276 - 3186" = "grey50"),
+  name = "from - to"
+  ) +
+  theme(panel.grid.minor.y = element_blank()) +
+  scale_y_continuous(breaks = seq(0, 15, 3))
+  
+```
+
+This column bar graph shows which travel(start station to end station)
+per month happened most during the year of 2018. It is possible to see
+that the travel that happened most (7 months in 12) was from the 3203
+station to 3186 station. From a total of four travels that happen most
+per month in 2018, the station 3186 is the final station in 3 of those 4
+travels.
+
+This insight could be relevant for the business to strengthen the
+bicycle maintenance team close to the locals with higher utilization. It
+may be equally important for areas with fewer travels to do more
+marketing to try to bring more users.
+
+### **Location of start stations**
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+awesome <- makeAwesomeIcon(
+  icon = "circle",
+  iconColor = "black",
+  markerColor = "blue",
+  library = "fa"
+)
+
+leaflet(data = nyc_bikes_df) %>% 
+  addTiles() %>% 
+  addMarkers(
+    lng = ~start_long,
+    lat = ~start_lat,
+    icon = awesome,
+    popup = ""
+  )
+```
+
+This leaflet graph show how spread are the stations across the city used
+as start station. This visualization could help to know if there are
+regions with more concentration, and this way have more attention and
+reinforce/increase the services, or in the locations with less demand
+make efforts to try to bring more users.
