@@ -1,2 +1,2 @@
-# data_analysis_reports
+# Data Analysis Reports
  Reports with organized and summarised findings from data analysis results. 
