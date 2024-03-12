@@ -1,23 +1,104 @@
 ---
-title: "Statistics & Hypothesis testing - PDA"
+title: "Penguins"
+subtitle: "Statistics & Hypothesis testing"
 output:
   html_document:
-    df_print: paged
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    css: styles.css
+    number_sections: false    
 ---
 
-libraries
+::: {style="float:left;position:absolute;top:0px"}
+![](images/lter_penguins.png){width="197"}
+:::
 
-```{r}
+```{=html}
+
+<style>
+
+ /*--- HEADER & TITLE -------------------------------------------------*/
+
+      div#header {background-color:none;margin-top:0px}
+      
+      h1.title{ padding: 20px 0px 0px 0px;
+                margin-top:0px;
+                margin-left:250px;
+                color:black;}
+      
+      h3.subtitle{margin-left:250px;margin-top:0px}
+  
+  
+  
+  /*--- TOC_FLOAT ------------------------------------------------------*/
+  
+      /* -- Costumise tab's color selected --*/
+      li.tocify-item.list-group-item.active {background-color: #0F6F74;}
+      
+      
+      /* -- Costumise body --*/
+      .tocify ul, .tocify li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border: none;
+        line-height: 20px;
+        background-color: #FFFCF5;
+        color:#FF7202;
+      }
+  
+  
+  
+  /*--- BODY -----------------------------------------------------------*/
+    
+      body {background-color: #FFFCF5; color: "black";}
+            
+      p.body {text-align:justify; line-height: 3.5;}
+      
+      h1 {color: black}
+  
+            
+  
+  /*--- TABSETS --------------------------------------------------------*/            
+  
+      /*-- Dimension of each tab --*/
+      .tabset .nav-tabs > li {width: 50%;}
+      
+      /*-- Tab selected --*/
+      .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+          cursor: default;
+          background-color: #EC8E2A;
+          border-top: 5px solid ;
+          border-top-color: #82BB25;
+          color:white;
+          text-align:center;
+          text-transform: uppercase;
+          font-weight:bold;
+        }
+        
+      /*-- Tab NO selected --*/ 
+      .nav-tabs>li>a {background-color:#4C8799; color:white;}
+      
+      /*-- Tab NO selected hover --*/ 
+      .nav-tabs>li>a:hover {background-color:#4C8799; color:#EC8E2A;}
+      
+      /*-- border --*/
+      .nav-tabs {border-bottom: 1px solid #343D72;}
+
+</style>
+```
+```{r include=FALSE}
 library(tidyverse)
 library(skimr)
 library(infer)
 library(e1071)           # to manage skewness
 library(palmerpenguins)  # install.packages("palmerpenguins")
+library(ggh4x) #handle facet_wrap plots(https://teunbrand.github.io/ggh4x/articles/Facets.html) 
 ```
 
-read data
-
-```{r, message = F, warning = F}
+```{r, message = F, warning = F, include=FALSE}
 penguins <- palmerpenguins::penguins %>% 
   janitor::clean_names()
 ```
@@ -26,27 +107,28 @@ We are interested in how **bill length** differ between the three species of pen
 
 # 1. Exploratory analysis
 
-Explore the dataset using visualisations, and keep in mind the question you're trying to answer above.
-
 ### glimpse()
 
-```{r}
+```{r warning=FALSE, echo=FALSE, message=FALSE}
 glimpse(penguins)
 ```
 
 ### skmi()
 
-```{r}
+```{r warning=FALSE, echo=FALSE, message=FALSE}
 penguins %>% 
   group_by(species) %>% 
   skim(bill_length_mm)
 ```
 
-## Analysis using bloxpot
+## Boxplot Analysis
 
 A boxplot is a useful way to look at the distribution of your data.
 
-**Introduction**
+
+### {.tabset}
+
+#### Boxplot Analysis Support
 
 The central box in bloxpot correspond to the interquartile range (IQR) of the distribution (50% of values are falling between the Q1 and Q3). The whiskers on either side of the box mark the positions beyond which data values are normally deemed to be outliers.
 
@@ -62,38 +144,47 @@ The position of the median/ Q2 (bar inside the central box) show the symmetry an
 
     ![](images/skewness.jfif)
 
-```{r}
-penguins %>% 
+
+#### Data Distribution Analysis
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+p <- penguins %>% 
   drop_na(bill_length_mm) %>% 
   group_by(species) %>% 
-  ggplot()+
-  aes(x = bill_length_mm, 
-      y = 1) +
+  ggplot() +
+  aes(x = bill_length_mm, y = 1) +
   geom_boxplot(outlier.colour = NA) +
   geom_point(position = position_jitter(height = .2), color = 4, alpha = .3) +
-  facet_wrap(~species, scales = "free", nrow = 3) +
   labs(
     title = "Bill length (mm) by penguin species",
     x     = "\nbill length (mm)",
     y     = NULL) + 
   scale_x_continuous(breaks = seq(25, 60, 1)) +
   theme_minimal() +
-  theme(strip.background = element_rect(fill = "grey80", colour = "white"),
-        strip.text       = element_text(face = "bold"),
-        axis.text.y      = element_blank(),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank()
-        )
+  theme(
+    strip.text       = element_text(face = "bold", color = "black"),
+    axis.text.y      = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.background = element_rect("#F5F2EB"),
+    panel.border = element_blank()
+  )
+
+# Apply different strip backgrounds using facet_theme from ggh4x
+p + ggh4x::facet_wrap2(~species,  scales = "free", nrow = 3,
+                strip = strip_themed(
+                  background_x = elem_list_rect(fill = c("#FF7B01", "#C35BCA", "#0E7470")),
+                  text_x = elem_list_text(colour = c("black", "black", "white"))))
+                
 ```
 
-**Interpretation**
 
 By specie, will be done a preview analysis looking for bloxpot how our data relation with bill length by penguins specie is distributed.
 
--   **Adelie** **:** the distribution of bill length is symetric, and there are not outliers.
+-   **Adelie:** the distribution of bill length is symetric; there are not outliers.
 
--   **Chinstrap:** the distribution is assymetric and negatively skewed (skewed left).
+-   **Chinstrap:** the distribution is assymetric; negatively skewed (skewed left).
 
     1.  **median position:** the median value is not centered on the IQR, but shifted to the right. It is visible by the scale of bill length, where from Q1 to Q2 the difference is about 3 mm, and between Q2 and Q3 is less more than 1 mm.
     2.  **whisker:** in a left skewed,is expected that the whisker is shorter on the upper end of the box than the lower end. However in this case it is not verified once that the upper whisker has a length of 7mm (from 51mm to 58mm) and the other hand the the lower whisker has a length of 5.5mm (from 41mm to 46.5mm, approximated values);
@@ -109,7 +200,7 @@ By specie, will be done a preview analysis looking for bloxpot how our data rela
 
 ```{r}
 # A futher understanding of bloxplot teel us in number.
-bloxpot_summary <- penguins %>% 
+bloxpot_summary <- as.tibble(penguins %>% 
   group_by(species) %>% 
   summarise(
     #Q1: the value splitting the distribution into a lower 25% and higher 75%.
@@ -129,13 +220,17 @@ bloxpot_summary <- penguins %>%
                                na.rm = TRUE),
     nr_outlier_lower = sum(bill_length_mm < lower_whisker,
                                na.rm = TRUE)
-    )
+    ))
 
 bloxpot_summary
 ```
 
 -   **IRQ:** 50% of values are concentrated in a range of 4mm for Adelie, 4.725 mm for Chinstrap and 4.250 mm for Gentoo.
 -   **number of potential outliers:** Just for Gentoo specie apparently there is an unique outlier.
+
+
+
+### {-}
 
 **To meet the ouliers by standardized variable / z-score or a standard score.**
 
@@ -163,7 +258,9 @@ There is an outlier as expected in Gentoo specie.
 
 # 2. Summary statistics
 
-### [**Concepts**]{.underline}
+### {.tabset}
+
+#### [**Concepts**]{.underline}
 
 -   **Skewness** in a distribution refers to asymmetry, to a tendency to be distorted the left (negative value, and centrality measures typically fall in the order *mean\<median\<mode*) or right (positive value and measures fall in the order *mode\<median\<mean*.). The magnitude of skewness is given by the absolute value of skewness, where:
 
@@ -177,6 +274,8 @@ There is an outlier as expected in Gentoo specie.
     -   95% for two standard deviation, and
     -   99.7% for 3 standard deviation.
 
+
+#### Summary Statistics Analysis
 ```{r}
 # Function that allow to classify the magnitude of the skewness
 # Output of this function is used in a summarise bellow where other statistics 
@@ -227,6 +326,9 @@ summary_statistics
     -   **Adelie:** is expected that 68% of values are between 36.161 (mean - sd) and 41.487 (mean + sd);
     -   **Chinstrap:** is expected that 68% of values are between 45.495 and 52.173.
     -   **Gentoo:** expected that 68% of values are between 44.462 and 50.674.
+
+
+### {-}
 
 # 3. Hypothesis test & probability
 
