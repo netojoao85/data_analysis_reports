@@ -2,205 +2,189 @@
 title: "Penguins"
 subtitle: "Statistics & Hypothesis testing"
 output:
+  rmdformats::material
   html_document:
     toc: true
     toc_float: 
-      collapsed: false
+      collapsed: true
       smooth_scroll: true
-    css: styles.css
+    css: css/style.css
     number_sections: false    
 ---
 
-::: {style="float:left;position:absolute;top:0px"}
-![](images/lter_penguins.png){width="197"}
+::: {style="float:left;position:absolute;top:0px;margin-top:10px;"}
+![](images/lter_penguins.png){width="300"}
 :::
 
-```{=html}
-
-<style>
-
- /*--- HEADER & TITLE -------------------------------------------------*/
-
-      div#header {background-color:none;margin-top:0px}
-      
-      h1.title{ padding: 20px 0px 0px 0px;
-                margin-top:0px;
-                margin-left:250px;
-                color:black;}
-      
-      h3.subtitle{margin-left:250px;margin-top:0px}
-  
-  
-  
-  /*--- TOC_FLOAT ------------------------------------------------------*/
-  
-      /* -- Costumise tab's color selected --*/
-      li.tocify-item.list-group-item.active {background-color: #0F6F74;}
-      
-      
-      /* -- Costumise body --*/
-      .tocify ul, .tocify li {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        border: none;
-        line-height: 20px;
-        background-color: #FFFCF5;
-        color:#FF7202;
-      }
-  
-  
-  
-  /*--- BODY -----------------------------------------------------------*/
-    
-      body {background-color: #FFFCF5; color: "black";}
-            
-      p.body {text-align:justify; line-height: 3.5;}
-      
-      h1 {color: black}
-  
-            
-  
-  /*--- TABSETS --------------------------------------------------------*/            
-  
-      /*-- Dimension of each tab --*/
-      .tabset .nav-tabs > li {width: 50%;}
-      
-      /*-- Tab selected --*/
-      .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
-          cursor: default;
-          background-color: #EC8E2A;
-          border-top: 5px solid ;
-          border-top-color: #82BB25;
-          color:white;
-          text-align:center;
-          text-transform: uppercase;
-          font-weight:bold;
-        }
-        
-      /*-- Tab NO selected --*/ 
-      .nav-tabs>li>a {background-color:#4C8799; color:white;}
-      
-      /*-- Tab NO selected hover --*/ 
-      .nav-tabs>li>a:hover {background-color:#4C8799; color:#EC8E2A;}
-      
-      /*-- border --*/
-      .nav-tabs {border-bottom: 1px solid #343D72;}
-
-</style>
-```
 ```{r include=FALSE}
-library(tidyverse)
-library(skimr)
-library(infer)
-library(e1071)           # to manage skewness
-library(palmerpenguins)  # install.packages("palmerpenguins")
-library(ggh4x) #handle facet_wrap plots(https://teunbrand.github.io/ggh4x/articles/Facets.html) 
+source(file = here::here("libraries.R"))
 ```
 
 ```{r, message = F, warning = F, include=FALSE}
 penguins <- palmerpenguins::penguins %>% 
   janitor::clean_names()
+
+dim_penguins <- dim(penguins)
+n_rows <- nrow(penguins)
+n_col  <- ncol(penguins)
+
+n_rows
+n_col
+
+dim_penguins[[1]]
+dim_penguins[[2]]
 ```
 
-We are interested in how **bill length** differ between the three species of penguin (Adelie, Chinstrap & Gentoo) in this dataset.
+<br> <br> <br> <br>
 
 # 1. Exploratory analysis
 
-### glimpse()
+::: {style="float:left;"}
+We are interested in how **bill length** differs between the three species of penguin (Adelie, Chinstrap & Gentoo) of penguins dataset from the 'palmer penguins' package.
+:::
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-glimpse(penguins)
+
+variables_info <- data.frame(
+  sapply(penguins,class)
+  )
+
+# Move rownames for a variable called 'variable';
+# Rownames numerated from 1 to nr of rows
+variables_info$varibale <- rownames(variables_info)
+rownames(variables_info) <- 1:nrow(variables_info)
+variables_info <- variables_info %>% relocate(varibale)
+
+
+#edit table
+kable(
+    x = variables_info,
+    col.names = c("Variable","Type"),
+    align = "c"
+  ) %>% 
+  kable_styling(
+    full_width = FALSE,
+    position = "float_right",
+    bootstrap_options = c("striped", "responsive"),
+    stripe_color = "#FFF2CC") %>% 
+  add_footnote(
+    label = c("List of names and variable type"), 
+    escape = FALSE,
+    notation = "none") %>%
+  row_spec(0, background = "#B3E0FF", color = "#333333") %>%
+  row_spec(1:nrow(variables_info), extra_css = "border-bottom: 1px solid #DCEFFB")
+
 ```
 
-### skmi()
-
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+#https://cran.r-project.org/web/packages/skimr/vignettes/skimr.html
+
 penguins %>% 
   group_by(species) %>% 
-  skim(bill_length_mm)
+  skim(bill_length_mm) %>% 
+  yank("numeric") 
+
+
 ```
 
-## Boxplot Analysis
+Boxplot Analysis
 
-A boxplot is a useful way to look at the distribution of your data.
+A boxplot is a useful way to look at the distribution of our data. By specie, will be done a preview analysis to know how bill length is distributed.
 
+###  {.tabset}
 
-### {.tabset}
+#### Bill length distribution
 
-#### Boxplot Analysis Support
+```{r}
+box_plot_description <- c("bill length distribution symetric and no outliers",
+                          
+                          "asymmetric distribution - negatively skewed (skewed left).
 
-The central box in bloxpot correspond to the interquartile range (IQR) of the distribution (50% of values are falling between the Q1 and Q3). The whiskers on either side of the box mark the positions beyond which data values are normally deemed to be outliers.
+1.  **median position:** the median value is not centered on the IQR, but shifted to the right. It is visible by the scale of bill length, where from Q1 to Q2 the difference is about 3 mm, and between Q2 and Q3 is less than 1 mm.
+2.  **whisker:** in a left-skewed, is expected that the whisker is shorter on the upper end of the box than the lower end. However in this case it is not verified once that the upper whisker has a length of 7mm (from 51mm to 58mm) and the other hand the the lower whisker has a length of 5.5mm (from 41mm to 46.5mm, approximated values);
+3.  **outliers:** All values are between the upper and lower whisker which means that there are no outliers. However, some values seem isolated and far away from the most distribution of values, like values above 55mm. The fact that the upper whisker is higher than lower, is the reverse that would be expected to influence this isolate value.",
 
-![](images/bloxplot.jfif)
-
-The position of the median/ Q2 (bar inside the central box) show the symmetry and skewness of the data. The skewness refers to distortion or asymmetry in a normal distribution, in a set of data:
-
--   **symmetric distribution**, when the median is in the middle of the box, and and the the whiskers are about the same on both sides of the box;
-
--   **distribution is positively skewed (skewed right)**,when the median is closer to the bottom of the box (Q1), and the whisker is shorter on the lower end of the box; and
-
--   **distribution is negatively skewed (skewed left)**, when median is closer to the top of the box (Q3), and the whisker is shorter on the upper end of the box.
-
-    ![](images/skewness.jfif)
-
-
-#### Data Distribution Analysis
+"ooooooooooooooooooooo"
+                          
+                          
+                          )
+```
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
-p <- penguins %>% 
+penguins_boxplot <- penguins %>% 
   drop_na(bill_length_mm) %>% 
   group_by(species) %>% 
   ggplot() +
   aes(x = bill_length_mm, y = 1) +
   geom_boxplot(outlier.colour = NA) +
-  geom_point(position = position_jitter(height = .2), color = 4, alpha = .3) +
+  geom_point(position = position_jitter(height = .2), alpha = .5, aes(color = species)) +
   labs(
-    title = "Bill length (mm) by penguin species",
-    x     = "\nbill length (mm)",
+    # title = "Bill length (mm) by penguin species",
+    x     = NULL,
     y     = NULL) + 
   scale_x_continuous(breaks = seq(25, 60, 1)) +
+  scale_color_manual(values = c("Adelie" = "#FF7B01", "Chinstrap" = "#C35BCA", "Gentoo" = "#0E7470")) +
   theme_minimal() +
   theme(
-    strip.text       = element_text(face = "bold", color = "black"),
+    #strip.text       = element_text(face = "bold", color = "black"),
     axis.text.y      = element_blank(),
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
     panel.grid.minor.x = element_blank(),
-    panel.background = element_rect("#F5F2EB"),
-    panel.border = element_blank()
+    panel.background = element_rect(fill = "#FFFCF5", color = "#FFFCF5"),
+    plot.background = element_rect(fill = "#FFFCF5", color = "#FFFCF5"),
+    panel.border = element_blank(),
+    axis.line = element_blank(),
+    legend.position = "none"
   )
 
 # Apply different strip backgrounds using facet_theme from ggh4x
-p + ggh4x::facet_wrap2(~species,  scales = "free", nrow = 3,
-                strip = strip_themed(
-                  background_x = elem_list_rect(fill = c("#FF7B01", "#C35BCA", "#0E7470")),
-                  text_x = elem_list_text(colour = c("black", "black", "white"))))
-                
+# https://teunbrand.github.io/ggh4x/articles/Facets.html
+penguins_boxplot + ggh4x::facet_wrap2(
+  ~species,  scales = "free", nrow = 3,
+  labeller = labeller(group = as_labeller(box_plot_description)),
+  strip = strip_themed(
+    # background_x = elem_list_rect(fill = c("#FF7B01", "#C35BCA", "#0E7470")),
+    text_x = elem_list_text(colour = c("black", "black", "black"))
+    )
+  )
+
 ```
 
+<div style="background-color:#F5F2EB; border:0.1px solid #F5F2EB; padding:15px">
 
-By specie, will be done a preview analysis looking for bloxpot how our data relation with bill length by penguins specie is distributed.
+<p style="text-align:center; font-weight:bold; font-size:30px; color: #0E7470;margin-top:5px">
 
--   **Adelie:** the distribution of bill length is symetric; there are not outliers.
+Analysis
 
--   **Chinstrap:** the distribution is assymetric; negatively skewed (skewed left).
+</p>
 
-    1.  **median position:** the median value is not centered on the IQR, but shifted to the right. It is visible by the scale of bill length, where from Q1 to Q2 the difference is about 3 mm, and between Q2 and Q3 is less more than 1 mm.
-    2.  **whisker:** in a left skewed,is expected that the whisker is shorter on the upper end of the box than the lower end. However in this case it is not verified once that the upper whisker has a length of 7mm (from 51mm to 58mm) and the other hand the the lower whisker has a length of 5.5mm (from 41mm to 46.5mm, approximated values);
-    3.  **outliers:** All values are between the upper and lower whisker what means that apparently there are not outliers. However, some values seems isolated and far way from the most distribution of values, like values above 55mm. The fact of the upper whisker be higher than lower, that is the reverse that would be expected have the influence of this isolate value.
+**Adelie:** bill length distribution symetric and no outliers.
 
--   **Gentoo[:]{.smallcaps}** the distribution is positively skewed (skewed right).
+<hr style="border:1px solid">
 
-    1.  **median position:** Although not accentuated, the median value is not centered on the IQR, but slight shifted to the left;
-    2.  **whisker:** as expected in an positively skewed, the whisker is shorter on the lower end of the box;
-    3.  **outliers:** It is visible that are outliers. There is at least one value beyond the upper whisker.
+**Chinstrap:** asymmetric distribution - negatively skewed (skewed left).
+
+1.  **median position:** the median value is not centered on the IQR, but shifted to the right. It is visible by the scale of bill length, where from Q1 to Q2 the difference is about 3 mm, and between Q2 and Q3 is less than 1 mm.
+2.  **whisker:** in a left-skewed, is expected that the whisker is shorter on the upper end of the box than the lower end. However in this case it is not verified once that the upper whisker has a length of 7mm (from 51mm to 58mm) and the other hand the the lower whisker has a length of 5.5mm (from 41mm to 46.5mm, approximated values);
+3.  **outliers:** All values are between the upper and lower whisker which means that there are no outliers. However, some values seem isolated and far away from the most distribution of values, like values above 55mm. The fact that the upper whisker is higher than lower, is the reverse that would be expected to influence this isolate value.
+
+<hr style="border:1px solid">
+
+**Gentoo[:]{.smallcaps}** the distribution is positively skewed (skewed right).
+
+1.  **median position:** Although not accentuated, the median value is not centered on the IQR, but slight shifted to the left;
+2.  **whisker:** as expected in an positively skewed, the whisker is shorter on the lower end of the box;
+3.  **outliers:** It is visible that are outliers. There is at least one value beyond the upper whisker.
+
+</div>
 
 **Numeric Information from bloxpots:**
 
 ```{r}
 # A futher understanding of bloxplot teel us in number.
-bloxpot_summary <- as.tibble(penguins %>% 
+bloxpot_summary <- as_tibble(penguins %>% 
   group_by(species) %>% 
   summarise(
     #Q1: the value splitting the distribution into a lower 25% and higher 75%.
@@ -228,9 +212,23 @@ bloxpot_summary
 -   **IRQ:** 50% of values are concentrated in a range of 4mm for Adelie, 4.725 mm for Chinstrap and 4.250 mm for Gentoo.
 -   **number of potential outliers:** Just for Gentoo specie apparently there is an unique outlier.
 
+#### Auxiliar: Boxplot interpretation
 
+The central box in bloxpot correspond to the interquartile range of data distribution (IQR), which means that 50% of values are falling between the Q1 and Q3. Values beyond the whiskers on both sides are normally considered as outliers.
 
-### {-}
+![](images/bloxplot.jfif)
+
+The bar inside the central box represents the median (Q2) and show the symmetry and skewness of the data. The skewness refers to distortion or asymmetry in a normal distribution in a dataset.
+
+-   **symmetric distribution**, The median is in the middle of the box, and the lengths of the whiskers are about the same on both sides;
+
+-   **distribution is positively skewed (skewed right)**, The median is closer to the bottom of the box (Q1), the whisker is shorter on the lower end of the box.
+
+-   **distribution is negatively skewed (skewed left)**, The median is closes to the top of the box and the whisker is shorter on the upper end of the box.
+
+    ![](images/skewness.jfif)
+
+###  {.unnumbered}
 
 **To meet the ouliers by standardized variable / z-score or a standard score.**
 
@@ -254,29 +252,19 @@ bill_length_z_score %>%
   filter(!between(z_score, left = -3, right = 3))
 ```
 
-There is an outlier as expected in Gentoo specie.
+There is an outlier as expected in the Gentoo specie.
+
+<br>
+
+<hr>
 
 # 2. Summary statistics
 
-### {.tabset}
+##  {.tabset}
 
-#### [**Concepts**]{.underline}
+### Summary Statistics Analysis
 
--   **Skewness** in a distribution refers to asymmetry, to a tendency to be distorted the left (negative value, and centrality measures typically fall in the order *mean\<median\<mode*) or right (positive value and measures fall in the order *mode\<median\<mean*.). The magnitude of skewness is given by the absolute value of skewness, where:
-
-    -   0.5 \< (fairly symmetrical)
-    -   0.5 - 1.0 (moderately skewed)
-    -   \>1.0 (highly skewed)
-
--   **The standard deviation** (sd) is a quantity expressing by how much, on average, the values in a distribution differ from the distribution mean. This way we can to know how spread out the observations are. For a normal distribution, is expected that:
-
-    -   68% of values fall within one standard deviation of the mean,
-    -   95% for two standard deviation, and
-    -   99.7% for 3 standard deviation.
-
-
-#### Summary Statistics Analysis
-```{r}
+```{r message = F, warning = F, include=FALSE}
 # Function that allow to classify the magnitude of the skewness
 # Output of this function is used in a summarise bellow where other statistics 
 # values were calculated too.
@@ -295,7 +283,7 @@ magnitude_skewness_classification <- function(skewness_value){
 }
 ```
 
-```{r}
+```{r warning=FALSE, echo=FALSE, message=FALSE}
 summary_statistics <- penguins %>% 
   drop_na() %>% 
   group_by(species) %>% 
@@ -308,31 +296,86 @@ summary_statistics <- penguins %>%
               magnitude_skewness_classification(skewness_bill_length)
   )
 
-summary_statistics
+summary_statistics %>% 
+  kable(
+    align = "c",
+    col.names = c("Species", "Mean", "Median", "sd", "Skewness", "Skewness Classification")
+  ) %>% 
+  kable_styling(
+    full_width = TRUE,
+    position = "center",
+    bootstrap_options = c("basic", "responsive")) %>% 
+  add_footnote(notation = "none", label = "Penguins Bill Length Summary Statistics") %>% 
+  row_spec(0, background = "#FFF2CC", color = "black", extra_css = "border-bottom:0px solid red") %>% 
+  row_spec(1:3, extra_css = "border-bottom:1px solid black")
 ```
 
-### [**Conclusions**]{.underline}
+***mean vs median*** The mean is more heavily swayed by outliers than the median. Looking for the results obtained, there are a relatively small difference between the mean and median values per specie in bill_length_mm variable, what take us to think that the number of outliers are relatively small or even non-existent.
 
--   ***mean vs median*** The mean is more heavily swayed by outliers than the median. Looking for the results obtained, there are a relatively small difference between the mean and median values per specie in bill_length_mm variable, what take us to think that the number of outliers are relatively small or even non-existent.
+**Skewness**
 
--   **Skewness**
+-   **Adelie:** skewness = 0.156, then the distribution of values in relation of asymmetry tends to be distorted the right. As the absolute skewness value is less than 0.5, the classification of skewness magnitude is classified as fairly symmetrical.
+-   **Chinstrap:** skewness = -0.089, then tends to be distorted the left. Absolute value (=0.089) is less than 0.5 then the in relation to the magnitude is classified as fairly symmetrical. Mean value is lower than median as expected for centrality measures in a left skewness.
+-   **Gentoo:** skewness = 0.604, then tends to be distorted the right. About the magnitude is classified as moderately skewed once the absolute value (=0.604) is between 0.5 and 1.
 
-    -   **Adelie:** skewness = 0.156, then the distribution of values in relation of asymmetry tends to be distorted the right. As the absolute skewness value is less than 0.5, the classification of skewness magnitude is classified as fairly symmetrical.
-    -   **Chinstrap:** skewness = -0.089, then tends to be distorted the left. Absolute value (=0.089) is less than 0.5 then the in relation to the magnitude is classified as fairly symmetrical. Mean value is lower than median as expected for centrality measures in a left skewness.
-    -   **Gentoo:** skewness = 0.604, then tends to be distorted the right. About the magnitude is classified as moderately skewed once the absolute value (=0.604) is between 0.5 and 1.
+**Standard deviation** (sd)
 
--   **Standard deviation** (sd)
+-   **Adelie:** is expected that 68% of values are between 36.161 (mean - sd) and 41.487 (mean + sd);
+-   **Chinstrap:** is expected that 68% of values are between 45.495 and 52.173.
+-   **Gentoo:** expected that 68% of values are between 44.462 and 50.674.
 
-    -   **Adelie:** is expected that 68% of values are between 36.161 (mean - sd) and 41.487 (mean + sd);
-    -   **Chinstrap:** is expected that 68% of values are between 45.495 and 52.173.
-    -   **Gentoo:** expected that 68% of values are between 44.462 and 50.674.
+### Auxiliar: Concepts
 
+::: {style="float:left;"}
+**The Skewness** in a distribution refers to its asymmetry, indicating a tendency to be distorted either to the left (negative value, where centrality measures typically fall in the order mean \< median \< mode) or to the right (positive value, where measures fall in the order mode \< median \< mean). The magnitude of skewness is determined by the absolute value of skewness.
+:::
 
-### {-}
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+Skewness <- data.frame(
+  range = c("< 0.5", "0.5 - 1.0", "> 1.0"),
+  skewness_magnitude = c("fairly symmetrical", "moderately skewed", "highly skewed")
+)
 
-# 3. Hypothesis test & probability
+Skewness %>% 
+  kable(
+    x = .,
+    col.names = c("Range", "Skewness magnitude"),
+    align = "c"
+  ) %>% 
+  kable_styling(
+    full_width = FALSE,
+    position = "right",
+    bootstrap_options = c("basic", "responsive")) %>% 
+  row_spec(0, background = "none", color = "black") %>% 
+  row_spec(1, background = "#FFBEC7", color = "black") %>% 
+  row_spec(2, background = "#FFF0D0", color = "black") %>% 
+  row_spec(3, background = "#B6E5BC", color = "black")
+  
+  
+```
 
-Perform a suitable hypothesis test to check whether the mean bill length of Gentoo is significantly longer than the mean bill length of Adelie.
+**The standard deviation (sd)** is a measure indicating the average amount by which values in a distribution deviate from the mean. It provides insight into the dispersion of observations within the distribution. In the case of a normal distribution, it is expected that:
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+sd_range <- data.frame(
+  range = c("68% of values fall within one standard deviation of the mean",
+            "95% for two standard deviation",
+            "99.7% for 3 standard deviation"))
+
+sd_range %>% 
+  kable(
+    x = .,
+    col.names = ""
+  ) %>% 
+  row_spec(0:3, extra_css = "border-bottom: 1px solid grey; padding:10px 0px" )
+  
+```
+
+<hr>
+
+# 3. Hypothesis test & Probability
+
+Perform a hypothesis test to check whether the mean bill length of Gentoo is significantly longer than the mean bill length of Adelie.
 
 **H0:** The average of bill length of gentoo specie is the same of the average of adelie specie. $$
 H_0: \mu_{average \ gentoo \ bill \ length} - \mu_{average \ adelie \ bill \ length} = 0
@@ -344,17 +387,16 @@ $$
 H_1: \mu_{average \ gentoo \ bill \ length} -\mu_{average \ adelie \ bill \ length} > 0
 $$
 
-### [**Concepts**]{.underline}
+##  {.tabset}
 
--   **significance level**: is a pre-determined threshold for the p-value determining whether we reject H0 or not. Significance level define too a Type I error that is the probability of rejecting the null hypothesis when the null hypothesis is true.
+### Hypothesis test
 
--   **null distribution**: generate a sampling distribution (normally using bootstrap) that is what would be expected if H0 were true, it means that H0 is used to simulate the null sampling distribution.
+```{r message = F, warning = F, include=FALSE}
 
--   **p-value**: is the probability of obtaining a value of the test statistic as extreme as or more extreme than the actual value obtained when the null hypothesis is true. Thus, the p-value is the smallest significance level at which a null hypothesis can be rejected, given the observed sample statistic.
+#  -------------------------------------------------------------------------------
+# Define the significance level and calculate null distribution, observed statistic and p-value.
+# --------------------------------------------------------------------------------
 
-**Define the significance level and calculate null distribution, observed statistic and p-value.**
-
-```{r}
 # decide significnce level (a)
 a <- 0.05
 
@@ -383,9 +425,12 @@ null_distribution %>%
   get_p_value(direction = "right", obs_stat = obs_statistic)
 ```
 
-**Visualize the p-value on the null distribution:**
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
 
-```{r}
+# --------------------------------------------------------------------
+# Visualize the p-value on the null distribution:
+# --------------------------------------------------------------------
+
 null_distribution %>%
   visualise() +
   shade_p_value(direction = "right", obs_stat = obs_statistic) + 
@@ -393,61 +438,109 @@ null_distribution %>%
   labs(title = "Visualize the p-value on the null distribution") +
   scale_x_continuous(breaks = seq(-3, 10, 1)) +
   theme(panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank())
+        panel.grid.minor.x = element_blank(),
+        panel.background = element_rect(fill = "#FFFCF5", color = "#FFFCF5"),
+        plot.background = element_rect(fill = "#FFFCF5", color = "#FFFCF5"))
 
 round(max(null_distribution$stat), digits = 3)
 round(min(null_distribution$stat), digits = 3)
 ```
 
-### **Conclusions:**
+::: {style="background-color:#F5F2EB; border:0.1px solid #F5F2EB; padding:15px"}
+<p style="text-align:center; font-weight:bold; font-size:30px; color: #0E7470;margin-top:5px">
 
-The visualization shows that the observed statistic (8.713487) is further beyond of our null distribution (representation of a sampling distribution of H0). With the observed statistic value far of any tail side of null distribution, it means that there is not probability of getting a value under the null distribution, and this way we reject H0.
+Analysis
 
-A type I error (false positive) is the probability of rejecting the null hypothesis when the null hypothesis is not false. It means that are 5% (significance level equal to 0,05) of probability to reject the hypothesis that the difference of the means of the bill length by species is equal, being this hypothesis true.
+</p>
 
-The p-value is lower than the significance level (0.05), so there is strong evidence to reject H0 in favour of H1 and conclude that the average of of bill length of gentoo specie is longer than the average of adelie specie.
+**Conclusions:** The visualization shows that the observed statistic (8.713487) is beyond our null distribution (representation of a sampling distribution of H0). With the observed statistic value far from any tail side of the null distribution, it means that there is no probability of getting a value under the null distribution, and this way we reject H0.
 
-# 4. Correlation
+A type I error (false positive) is the probability of rejecting the null hypothesis when the null hypothesis is not false. It means that are a 5% (significance level equal to 0,05) of probability rejecting the hypothesis that the difference of the means of the bill length by species is equal, being this hypothesis true.
 
-The correlation provides both the **direction** (negative or positive) and the **strength** of a linear relationship between two variables (r - correlation coefficient limited to the range from -1 to +1).
+The p-value is lower than the significance level (0.05), so there is strong evidence to reject H0 in favour of H1. Therefore, there is strong evidence that the average of bill length the Gentoo specie is longer than the average of the Adelie specie.
+:::
 
-A strong linear relationship occurring as the absolute value of the correlation approaches 1, where the individual observation points are close to a straight line. Intermediate values indicate that variables tend to be related.
+### Auxiliary: Theory concepts
 
--   **Null Correlation:** a correlation of 0 indicates no linear relationship between the two variables. The variables are independent.
--   **Positive Correlation:** with a correlation of +1 the two random variables have a perfect positive linear relationship, and, therefore, a specific value of one variable, X, predicts the other variable, Y, exactly. The variables are positively dependent.
--   **Negative Correlation:** a correlation of -1 indicates a perfect negative linear relationship between two variables, with one variable, X, predicting the negative of the other variable, Y. Perfect negative linear dependency is indicated by a correlation of -1.
+**Significance level**: is a pre-determined threshold for the p-value determining whether we reject H0 or not. The significance level defines Type I error, which is the probability of rejecting the null hypothesis when the null hypothesis is true.
 
-The magnitude to classify the strength of the correlation is showed on the follow table:
+**Null distribution**: is a sampling distribution, typically generated using bootstrap methods, representing what one would expect if the null hypothesis (H0) were true. In essence, H0 is employed to simulate this null sampling distribution.
 
-```{r warning=FALSE, echo=FALSE, message=FALSE}
+**p-value**: signifies the probability of observing a test statistic as extreme as, or more extreme than, the obtained value, assuming the null hypothesis is true. It serves as the smallest significance level at which we would reject the null hypothesis, considering the observed sample statistic.
 
-correlation <- tibble(
-  magnitude_rxy        = c("0", "0.01 - 0.19", "0.20 - 0.39", "0.40 - 0.59", 
-                           "0.60 - 0.79", "0.80 - 0.99", "1"),
-  strength_correlation = c("none", "very weak", "weak", "moderate",
-                           "strong", "very strong", "perfect")
-)
-correlation
-```
+##  {.unnumbered}
 
-### **Correlation Analysis: bill length, bill depth, flipper length, and body mass**
+<br>
 
-```{r warning=FALSE, message=FALSE}
+<hr>
 
-library(GGally)
+# 4. Correlation Analysis
 
-penguins %>% 
+##  {.tabset}
+
+### Correlation Matrix
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="80%"}
+
+r_plot <- penguins %>% 
   select(-year) %>% 
   ggcorr(label = TRUE, 
          geom        = "tile",
          label_size  = 4,
          label_round = 2,
-         label_color = "black") +
-  labs(title = "correlation matrix")
+         label_color = "black")
+
+r_plot + 
+  theme(panel.background = element_rect(fill = "#FFFCF5")) +
+  theme(plot.background = element_rect(fill = "#FFFCF5"))
+
 ```
+
+::: {style="background-color:#F5F2EB; border:0.1px solid #F5F2EB; padding:15px"}
+<p style="text-align:center; font-weight:bold; font-size:30px; color: #0E7470;margin-top:5px">
+
+Analysis
+
+</p>
 
 The length of the penguins bill has a negative weak correlation with the depth of the bill (r = -0.24), and a strong positive and strong correlation with the length of the flipper (r = 0.66) and the weight (r = 0.6).
 
 Therefore, with a weak dependency (weak linear relationship), it is not reasonable to make predictions of the penguing's bill length through the bill depth.
 
-By the other hand, we could look by the length of the flipper and the weight to predict the length of the penguin's bill, once both physical characteristics have a strong linear relationship with the bill´s length, reveling dependency from each other.
+On the other hand, we could look by the length of the flipper and the weight to predict the length of the penguin's bill, once both physical characteristics have a strong linear relationship with the bill´s length, reveling dependency from each other.
+:::
+
+### **Auxiliary: Theory concepts**
+
+The correlation provides both the **direction** and the **strength** of a linear relationship between two variables. The direction could be negative or positive and the strength is measured by the correlation coefficient (r) limited from -1 to +1.
+
+How much closer the correlation coefficient (r) is to 1, stronger would be the linear relationship between two variables. Intermediate values indicate that variables tend to be related.
+
+-   **Null Correlation:** a correlation equal to 0 indicates no linear relationship between the two variables; the variables are independent.
+-   **Positive Correlation:** with a correlation of +1 the two random variables have a perfect positive linear relationship, therefore, a specific value of one variable, X, predicts the other variable, Y, exactly. The variables are positively dependent.
+-   **Negative Correlation:** a correlation of -1 indicates a perfect negative linear relationship between two variables, with one variable, X, predicting the negative of the other variable, Y. Perfect negative linear dependency is indicated by a correlation of -1.
+
+The magnitude to classify the strength of the correlation between variables is shown in the following table:
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+correlation <- data.frame(
+  magnitude_rxy        = c("0", "0.01 - 0.19", "0.20 - 0.39", "0.40 - 0.59", 
+                           "0.60 - 0.79", "0.80 - 0.99", "1"),
+  strength_correlation = c("none", "very weak", "weak", "moderate",
+                           "strong", "very strong", "perfect")
+)
+correlation %>% 
+  kable(
+    x = .,
+    align = "c",
+    col.names = c("Magnitude r(x, y)", "Correlation Strength")
+  ) %>% 
+  kable_styling(
+    full_width = FALSE,
+    position = "center",
+    bootstrap_options = c("basic", "responsive")) %>% 
+  row_spec(0, background = "#FFF2CC", color = "black") 
+```
+
+##  {.unnumbered}

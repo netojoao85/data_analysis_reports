@@ -55,10 +55,11 @@ or social engagements, and more.
 
 #### **1.4. Data visualisation as a tool for decision-making**
 
-The main measure that guides the NYC Citi Bikes business is the number of users 
-that the company has. The amount of  users (subscribers or simple users) will
-dictate the revenues of the company, for that it is important to know about the 
-tendencies and preferences of users to offer the best service and experience.
+The main measure that guides the NYC Citi Bikes business is the number
+of users that the company has. The amount of users (subscribers or
+simple users) will dictate the revenues of the company, for that it is
+important to know about the tendencies and preferences of users to offer
+the best service and experience.
 
 This report has as propose answer 3 main questions:
 
@@ -357,7 +358,7 @@ leaflet(data = nyc_bikes_df) %>%
     lng = ~start_long,
     lat = ~start_lat,
     icon = awesome,
-    popup = ""
+    popup = nyc_bikes_df$start_station
   )
 ```
 

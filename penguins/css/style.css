@@ -1,0 +1,133 @@
+/*--- HEADER & TITLE -------------------------------------------------*/
+
+    div#header {background-color:none;margin-top:0px}
+        
+    h1.title{ padding: 20px 0px 0px 0px;
+            margin-top:0px;
+            margin-left:300px;
+            color:black;}
+
+    h3.subtitle{margin-left:300px; margin-top:0px; margin-bottom: 100px;}
+
+
+
+/*--- TOC_FLOAT ------------------------------------------------------*/
+
+    /* -- Costumise tab's color selected --*/
+    li.tocify-item.list-group-item.active {background-color: #0F6F74;}
+
+
+    /* -- Costumise body --*/
+    .tocify ul, .tocify li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    line-height: 20px;
+    background-color: #FFFCF5;
+    color:#FF7202;
+    }
+
+
+
+/*--- BODY -----------------------------------------------------------*/
+
+body {background-color: #FFFCF5; color: "black";}
+      
+p.body {
+    text-align:justify;
+    line-height: 3.5;
+    float: left;
+    }
+
+p{text-align: justify;}
+
+h1 {color: black}
+
+      
+
+/*--- TABSETS --------------------------------------------------------*/            
+
+    /*-- Dimension of each tab --*/
+    .tabset .nav-tabs > li {width: 50%;}
+
+    /*-- Tab selected --*/
+    .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+        cursor: default;
+        background-color: #B3E0FF;
+        border-top: 5px solid ;
+        border-top-color: #A5CEEB;
+        color:#333333;
+        text-align:center;
+        text-transform: uppercase;
+        font-weight:bold;
+    }
+    
+    /*-- Tab NO selected --*/ 
+    .nav-tabs>li>a {background-color:#DCEFFB; color:#333333;}
+
+    /*-- Tab NO selected hover --*/ 
+    .nav-tabs>li>a:hover {background-color:#CCCCCC; color:#333333;}
+
+    /*-- border --*/
+    .nav-tabs {border-bottom: 1px solid #4E89AE;}
+
+
+/*---  TABLES --------------------------------------------------------*/
+
+    tr:nth-child(even) { 
+        background: none;
+    }
+
+
+
+
+/*Customise result Analysis*/
+
+.result_analysis{
+    padding: 15px;
+    background-color: #F5F2EB;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, 
+    rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+}
+
+.result_analysis p{
+    text-align: justify;
+    line-height: 2.0;
+}
+
+.title_result_analysis{
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    margin-top: 5px;
+    color: #0F6F74;
+    background-color: #4E89AE;
+
+}
+
+
+
+
+/*--- collapse theroy -------------------------------------------*/
+.collapse_theory_title{
+    color: red;
+    font-size: 
+}
+
+.collapse_theory{
+    background-color:#F5F2EB;
+    padding:10px 10px;
+    text-align: justify;
+}
+
+.collapse_theory_content{
+    margin-top:20px;
+    padding-left:15px;
+    padding-right:20px;
+    line-height: 2.0;
+    font-family: "arial";
+   
+}
+
+table{margin-left: 40px;}
