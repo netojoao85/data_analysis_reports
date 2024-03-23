@@ -25,4 +25,5 @@ nyc_bikes_clean <- nyc_bikes %>%
   mutate(station_travel = str_c(
     start_station, end_station, sep = " - "), .after = "end_station")
 
-
+# nyc_bikes_clean %>% 
+#   write_csv("02_data_cleaned/nyc_bikes_clean.csv")
