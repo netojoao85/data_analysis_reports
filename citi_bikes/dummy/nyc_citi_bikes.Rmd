@@ -1,0 +1,61 @@
+---
+title: "Your Bikes Sharing Service in NYC"
+output:
+  html_document:
+    keep_md: false
+    df_print: paged
+    css: www/style.css
+    toc: true
+    toc_float: 
+          collapsed: false
+          smooth_scroll: false
+    number_sections: no
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(IRdisplay)
+library(htmltools)
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+title_and_header_dir              <- "www/title_and_header.html"
+```
+
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+title_and_header <- readLines(title_and_header_dir, warn = FALSE)
+HTML(paste(title_and_header, collapse = "\n"))
+
+```
+
+
+## Business Introduction
+```{r}
+
+```
+
+### Business Processes and Data Flow
+
+### Data Visualisation as a tool for decision-making
+
+### Data Types
+
+### Data Quality and Data Bias
+
+## Data Cleaning
+
+## Data Visualisations & Insights
+
+### Hires Per Month
+
+### Hires Per Month By Gender
+
+### Hires Per Each Week Day By Customer Type
+
+### Travels Frequency
+
+### Bikes with Most and Less Utilization
+
+### Start Stations Location

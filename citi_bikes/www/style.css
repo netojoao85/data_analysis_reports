@@ -1,0 +1,149 @@
+:root{ 
+    --sidebar:#333344;
+    --blue:#0050B5;
+    --pink:#FF00BF;
+    --lightgrey: #EFEFEF;
+    --sidebar-selected:#36A3E2;
+    --sidebar-no-selected: #E7F6FF;
+    --red: #EB1924;
+}
+
+div#header {
+    background-color: var(--sidebar-no-selected); 
+    margin-top:0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+h1.title{
+    color: var(--sidebar);
+    margin-top: 15px;
+    padding-left: 240px;
+}
+
+.author h5{
+    color: var(--sidebar-selected);
+    background-color: var(--sidebar-no-selected);
+    padding-top: 10px;
+}
+
+body {
+    background-color: white; 
+    color: black;
+    line-height: 1.5;
+    text-align: justify;
+    font-size: 16px;
+} 
+
+h2 {
+    margin-top: 30px;
+    background-color: var(--sidebar-selected);
+    margin-bottom: 0px;
+    padding:5px 15px;
+    color: white;
+}
+
+h3{
+    background-color:  #E0e0e0;
+    border-left: 5px solid var(--red);
+    margin-bottom: 0px;
+    padding: 5px 10px;
+    color: var(--sidebar);
+    font-weight: bold;
+}
+
+.paragraph {
+    margin-bottom: 10px;
+}
+
+.outcome_body{
+    display: table; 
+    clear: both; 
+    background-color: #F7F7F7;
+    border-left: 5px solid var(--red)
+}
+
+.outcome_icon{
+    float: left;
+    width: 10%; 
+    display: flex; 
+    justify-content: center; 
+    padding-top:10px;
+}
+
+.outcome_text{
+    float: left; 
+    width: 90%; 
+    padding: 0px 15px 10px 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/*-------------------------------------------------------------------*/
+/* TOC                                                               */
+/*-------------------------------------------------------------------*/
+
+/* To have the toc as a sidebar */
+    .tocify{
+        height: -webkit-fill-available;
+        position: fixed;
+        left: 0px;
+        overflow: auto;
+        border-radius: 0px;
+        margin: 0px;
+        background-color: var(--sidebar);
+        border: 1px solid var(--sidebar);
+    }
+
+    div#TOC.tocify {
+        width: -webkit-fill-available;
+        max-height: -webkit-fill-available;
+        margin: 0px;
+    }
+/*--------------------------------------------*/
+
+/*Toc inside background*/
+li.tocify-item {
+    background-color: var(--sidebar);
+    color:white;
+}
+
+/* Tab Selected */
+.list-group-item.active, .list-group-item.active:hover {
+    background-color: var(--sidebar-selected);
+    color:white;
+    border-left: 6px solid var(--red);
+    
+}
+
+/* Hover Tab No Selected */
+.list-group-item:hover {
+    background-color: var(--sidebar-no-selected);
+    color: black;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* leaflet                                                     */
+/*-------------------------------------------------------------------*/
+/*
+.leaflet-popup-content-wrapper {
+  background: var(--sidebar-no-selected);
+  color:var(--blue);
+  font-size:16px;
+  line-height:24px;
+  }
+.leaflet-popup-content-wrapper a {
+  color:rgba(255,255,255,0.5);
+  }
+.leaflet-popup-tip-container {
+  width:30px;
+  height:15px;
+  }
+.leaflet-popup-tip {
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:15px solid var(--sidebar-selected);
+  }
+*/

@@ -1,12 +1,8 @@
 
-# get libraries -----------------------------------------------------------
-source(file = "libraries.R", local = TRUE)$value
-
-
-
 # call dataset ------------------------------------------------------------
 
-source(file = "01_data_clean_script/citi_bikes_clean_script.R", local = TRUE)$value
+source(here::here("01_data_clean_script/citi_bikes_clean_script.R"), local = TRUE)$value
+
 
 
 # visualisation -----------------------------------------------------------

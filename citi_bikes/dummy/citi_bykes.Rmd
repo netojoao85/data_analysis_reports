@@ -1,0 +1,72 @@
+---
+title: ""
+output:
+  html_document:
+    keep_md: false
+    df_print: paged
+    css: www/style.css
+    toc: true
+    toc_float: 
+          collapsed: false
+          smooth_scroll: false
+    number_sections: no
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(IRdisplay)
+library(htmltools)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+title_and_header_dir    <- "www/title_and_header.html"
+decision_making_dir     <- "www/decision_making.html"
+data_quality_dir        <- "www/data_quality.html"
+data_types_cleaning_dir <- "www/data_types_cleaning.html"
+data_visualisations_dir     <- "www/data_visualisations.html"
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+title_and_header <- readLines(title_and_header_dir, warn = FALSE)
+HTML(paste(title_and_header, collapse = "\n"))
+```
+
+## Process and Data Flow
+
+![](www/images/data_flow.png)
+
+## Decision-making
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+decision_making <- readLines(decision_making_dir, warn = FALSE)
+HTML(paste(decision_making, collapse = "\n"))
+```
+
+## Data Quality and Bias
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+data_quality <- readLines(data_quality_dir, warn = FALSE)
+HTML(paste(data_quality, collapse = "\n"))
+```
+
+## Data Types & Cleaning 
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+data_types_cleaning <- readLines(data_types_cleaning_dir, warn = FALSE)
+HTML(paste(data_types_cleaning, collapse = "\n"))
+```
+
+## Data Visualisations & Insights
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+data_visualisations <- readLines(data_visualisations_dir, warn = FALSE)
+HTML(paste(data_visualisations, collapse = "\n"))
+```
+
+### Hires per month
+```{r}
+source("03_visualisations/bikes_hired_per_month.R", local = TRUE)$value
+```
+
+
+### Hires Per Month By Gender
