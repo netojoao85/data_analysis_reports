@@ -1,10 +1,4 @@
 
-# get libraries -----------------------------------------------------------
-
-source(file = "libraries.R")
-
-
-
 # get data ----------------------------------------------------------------
 
 penguins <- palmerpenguins::penguins
@@ -45,8 +39,9 @@ penguins_boxplot <- penguins %>%
 penguins_boxplot + ggh4x::facet_wrap2(
   ~species,  scales = "free", nrow = 3,
   strip = strip_themed(
-    # background_x = elem_list_rect(fill = c("#FF7B01", "#C35BCA", "#0E7470")),
-    background_x = elem_list_rect(fill = c("#FFF1C2", "#FACBFF", "#16D9B5"), color = c("#FFF1C2", "#FACBFF", "#16D9B5")),
+    background_x = elem_list_rect(
+      fill = c("#FFF1C2", "#FACBFF", "#16D9B5"), 
+      color = c("#FFF1C2", "#FACBFF", "#16D9B5")),
     text_x = elem_list_text(colour = c("black", "black", "white"))
   )
 )

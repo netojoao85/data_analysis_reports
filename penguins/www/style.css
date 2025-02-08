@@ -1,0 +1,190 @@
+:root{ 
+    --green:#0F6F74;
+    --orange: #FF7202;
+    --purple: #BF5CCB;
+    --background: #FFFCF5;
+    --info-color: black;
+    --light-blue: #B3E0FF;
+    --info-box: #E0DED7;
+    --sidebar: #F5F2EB;
+
+}
+
+div#header {
+    background-color: var(--background); 
+    margin-top:0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+h1.title{
+    color: black;
+    margin-top: 15px;
+    margin-left: 280px;
+}
+
+h3.subtitle{
+    margin-left:280px; 
+    margin-top:0px; 
+    margin-bottom: 50px;
+    color: black;
+}
+
+.author h5{
+    color: var(--sidebar-selected);
+    background-color: var(--sidebar-no-selected);
+    padding-top: 10px;
+}
+
+body {
+    background-color: var(--background); 
+    color: black;
+    line-height: 1.5;
+    text-align: justify;
+    font-size: 16px;
+} 
+
+h2 {
+    margin-top: 55px;
+    margin-bottom: 10px;
+    padding:5px 5px;
+    color: black;
+    border-left: 6px solid var(--green);
+    font-weight: bold;
+}
+
+h3{
+    background-color:  none;
+    margin-bottom: 0px;
+    padding: 5px 10px;
+    color: #424240;
+    font-weight: bold;
+}
+
+.paragraph {
+    margin-bottom: 10px;
+}
+
+.summary{
+    cursor:pointer;
+    background-color: var(--sidebar);
+    padding: 5px;
+    color: black;
+    font-weight: bold;
+    
+}
+
+.outcome_body{
+    display: table; 
+    clear: both; 
+    background-color: var(--sidebar);
+    border-bottom: 2px solid grey;
+}
+
+.outcome_icon{
+    float: left;
+    width: 10%; 
+    display: flex; 
+    justify-content: center; 
+    padding-top:10px;
+}
+
+.outcome_text{
+    float: left; 
+    width: 90%; 
+    padding: 0px 15px 10px 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.outcome_analysis{
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+
+
+.table_Skewness_magnitude{
+    float: right;
+    padding:10px 5px;
+    text-align: center;
+    margin-left: 30px;
+}
+
+.table_Skewness_magnitude td, .table_Skewness_magnitude th{
+    padding: 3px 10px;
+    border-bottom: 1px solid grey;
+
+} 
+
+
+.table_correlation{
+    float: right;
+    padding:10px 5px;
+    text-align: center;
+    margin-left: 30px;
+    margin-bottom: 20px;
+}
+
+.table_correlation td, .table_correlation th {
+    border-bottom: 1px solid grey;
+    padding: 3px 15px;
+}
+
+
+/*skmir table*/
+tr.header{
+    background-color: #F5F2EB;
+    color:black;
+}
+
+tr.header th{
+    text-align: center;
+}
+
+
+
+
+/*-------------------------------------------------------------------*/
+/* TOC                                                               */
+/*-------------------------------------------------------------------*/
+
+/* To have the toc as a sidebar */
+    .tocify{
+        height: -webkit-fill-available;
+        position: fixed;
+        left: 0px;
+        overflow: auto;
+        border-radius: 0px;
+        margin: 0px;
+        background-color: var(--sidebar);
+        border: 1px solid lightgrey;
+
+    }
+
+    div#TOC.tocify {
+        width: -webkit-fill-available;
+        max-height: -webkit-fill-available;
+        margin: 0px;
+    }
+/*--------------------------------------------*/
+
+/*Toc inside background*/
+li.tocify-item {
+    background-color: var(--sidebar);
+    color:var(--orange);
+}
+
+/* Tab Selected */
+.list-group-item.active, .list-group-item.active:hover {
+    background-color: var(--green);
+    color: white;
+    
+}
+
+/* Hover Tab No Selected */
+.list-group-item:hover {
+    background-color: var(--background);
+    color:var(--orange);
+}
+

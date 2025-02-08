@@ -1,0 +1,284 @@
+---
+title: "Penguins"
+subtitle: "Statistics & Hypothesis testing"
+output:
+  html_document:
+    keep_md: false
+    df_print: paged
+    css: www/style.css
+    toc: true
+    toc_float: 
+          collapsed: false
+          smooth_scroll: false
+    number_sections: no
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+# get libraries / packages ---------------------------------------------------
+
+library(palmerpenguins)  # install.packages("palmerpenguins")
+
+library(tidyverse)
+library(skimr)
+library(infer)
+library(e1071)  # to manage skewness
+
+library(ggh4x)  #handle facet_wrap plots(https://teunbrand.github.io/ggh4x/articles/Facets.html) 
+library(GGally) #correlaction plot
+
+#for tables
+library(knitr)
+library(kableExtra)
+library(bsicons)
+
+# to manage HTML files
+library(IRdisplay)
+library(htmltools)
+
+
+# call dataset ---------------------------------------------------
+
+penguins <- palmerpenguins::penguins %>% 
+  janitor::clean_names()
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+title_and_header_dir <- "www/title_and_header.html"
+
+
+boxplot_info_dir <- "www/boxplot_info.html"
+
+summary_outcomes_dir <- "www/summary_outcomes.html"
+summary_skewness_outcomes_dir <- "www/summary_skewness_outcomes.html"
+statistic_info_dir <- "www/summary_statistics_info.html"
+
+hypothesis_test_outcome_dir <- "www/hypothesis_test_outcome.html"
+hypothesis_test_info_dir <- "www/hypothesis_test_info.html"
+
+correlation_outcomes_dir <- "www/correlation_outcomes.html"
+correlation_info_dir <- "www/correlation_info.html"
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+# Title & Header -----------------------------------------------------------
+
+title_and_header <- readLines(title_and_header_dir, warn = FALSE)
+HTML(paste(title_and_header, collapse = "\n"))
+
+```
+
+## 1. Exploratory Analysis
+
+### 1.1. Variables
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+variables_info <- data.frame(
+  sapply(penguins,class)
+)
+
+variables_info$variable <- rownames(variables_info)
+rownames(variables_info) <- 1:nrow(variables_info)
+variables_info <- relocate(variables_info, variable)
+variables_info$type <- variables_info$sapply.penguins..class.
+
+
+variables_info <- variables_info %>% 
+  select(variable, type) %>% 
+  arrange(type) %>% 
+  pivot_wider(names_from = variable, values_from = type)
+
+variables_info %>% 
+  kable(align = "c") %>% 
+  kable_styling(
+    full_width = TRUE,
+    position = "center",
+    bootstrap_options = c("none", "responsive")) %>% 
+  row_spec(0, background = "#F5F2EB", color = "black") %>%
+  row_spec(1:nrow(variables_info), extra_css = "border-bottom: 1px solid black")
+
+```
+
+### 1.2. Summary of Bill Lengths
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+
+penguins %>% 
+  group_by(species) %>% 
+  skim(bill_length_mm) %>% 
+  yank("numeric")
+
+```
+
+### 1.3. Scatter of Species Bill Lengths
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+
+source(here::here("scripts/boxplot_analysis/boxplot_bill_length_distribution.R"), local = TRUE)$value
+
+```
+
+
+
+## 2. Summary statistics Analysis
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+#call the function created to classify the skewness magnitude
+source(here::here("scripts/function_magnitude_skewness_classification/magnitude_skewness_classification.R"), local = TRUE)
+
+summary_statistics <- penguins %>% 
+  drop_na() %>% 
+  group_by(species) %>% 
+  summarise(mean_bill_length     = round(mean(bill_length_mm), digits = 3),
+            median_bill_length   = round(median(bill_length_mm), digits = 3),
+            sd_bill_length       = round(sd(bill_length_mm), digits = 3),
+            skewness_bill_length = round(skewness(bill_length_mm, 
+                                            type = 1), digits = 3),
+            magnitude_skewness_classification = 
+              magnitude_skewness_classification(skewness_bill_length)
+  )
+
+summary_statistics %>% 
+  kable(
+    align = "c",
+    col.names = c("Species", "Mean", "Median", "sd", "Skewness", "Skewness Classification")
+  ) %>% 
+  kable_styling(
+    full_width = TRUE,
+    position = "center",
+    bootstrap_options = c("basic", "responsive")) %>% 
+  # add_footnote(notation = "none", label = "Penguins Bill Length Summary Statistics") %>% 
+  row_spec(0, background = "", color = "black", extra_css = "border-bottom:0px solid red") 
+  # row_spec(1:3, extra_css = "border-bottom:1px solid black")
+
+
+```
+
+
+### 2.1. Mean & Median
+The mean is more sensitive to outliers than the median. Upon examining the results, we observe a relatively small difference between the mean and median values for each species. This suggests either a limited presence of outliers or their absence altogether.
+
+### 2.2. Standard Deviation (sd)
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+summary_outcomes <- readLines(summary_outcomes_dir, warn = FALSE)
+HTML(paste(summary_outcomes, collapse = "\n"))
+```
+
+
+### 2.3. Skewness
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+summary_skewness_outcomes <- readLines(summary_skewness_outcomes_dir, warn = FALSE)
+HTML(paste(summary_skewness_outcomes, collapse = "\n"))
+
+# source(here::here("scripts/skewness_analysis.R"), local = TRUE)$value
+source(here::here("scripts/skewness_analysis.R"), local = TRUE)
+
+gridExtra::grid.arrange(adelie, chinstrap, gentoo, ncol = 3)
+```
+
+
+## 3. Hypothesis test & Probability
+
+A hypothesis test to check whether the mean bill length of Gentoo is significantly longer than the mean bill length of Adelie.
+
+**H0:** The average of bill length of Gentoo specie is the same of the average of Adelie specie. $$H_0: \mu_{average \ gentoo \ bill \ length} - \mu_{average \ adelie \ bill \ length} = 0$$ **H1:** The average of bill length of Gentoo specie is longer than the average of Adeleie specie. $$H_1: \mu_{average \ gentoo \ bill \ length} -\mu_{average \ adelie \ bill \ length} > 0$$
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+hypothesis_test <- source(file = here::here("scripts/hypothesis_testing/hypothesis_test.R"), local = TRUE)
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+
+summary_hypothesis_test <- as.data.frame(
+  c(
+    "observed statistic" = round(obs_statistic, digits = 3),
+    "p-value" = p_value,
+    "min" = round(min(null_distribution$stat), digits = 3),
+    "max"  = round(max(null_distribution$stat), digits = 3)
+  )
+)
+
+summary_hypothesis_test %>% 
+  kable(
+    col.names = c("Observed Statistic", "p-value", "min", "max"),
+    align = c("c")
+  ) %>% 
+  kable_styling(
+    full_width = TRUE,
+    position = "center",
+    bootstrap_options = c("none", "responsive")) %>% 
+  add_footnote(threeparttable = TRUE,
+               # label = c("Results of Hypothesis Testing"), 
+               escape = FALSE,
+               notation = "none") %>% 
+  row_spec(0, background = "#F5F2EB", color = "black") %>%
+  row_spec(1, extra_css = "border-bottom: 1px solid black")
+
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+hypothesis_test_outcome <- readLines(hypothesis_test_outcome_dir, warn = FALSE)
+HTML(paste(hypothesis_test_outcome, collapse = "\n"))
+```
+
+```{r  warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+hypothesis_test$value
+```
+
+## 4. Correlation Analysis
+
+### 4.1. Correlation Matrix
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+correlation_outcomes <- readLines(correlation_outcomes_dir, warn = FALSE)
+HTML(paste(correlation_outcomes, collapse = "\n"))
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.height="100%"}
+
+source(here::here("scripts/correlation_analysis/correlation_matrix.R"), local = TRUE)$value
+
+```
+
+### 4.2. Correlation
+
+```{r  warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+source(here::here("scripts/correlation_analysis/correlation_analysis_body.R"), local = TRUE)$value
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
+source(here::here("scripts/correlation_analysis/correlation_analysis_by_specie.R"), local = TRUE)$value
+```
+
+## 5. Auxiliar - Theory concepts
+Expand each option below to get more details about the theory concepts that support the analysis. 
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+boxplot_info <- readLines(boxplot_info_dir, warn = FALSE)
+HTML(paste(boxplot_info, collapse = "\n"))
+
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+statistic_info <- readLines(statistic_info_dir, warn = FALSE)
+HTML(paste(statistic_info, collapse = "\n"))
+
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+hypothesis_test_info <- readLines(hypothesis_test_info_dir, warn = FALSE)
+HTML(paste(hypothesis_test_info, collapse = "\n"))
+
+```
+
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+
+correlation_info <- readLines(correlation_info_dir, warn = FALSE)
+HTML(paste(correlation_info, collapse = "\n"))
+
+```

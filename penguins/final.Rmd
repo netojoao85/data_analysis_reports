@@ -108,7 +108,7 @@ The bar inside the central box represents the median (Q2) and shows the data sym
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE, out.width="100%"}
 
-source(file = here::here("visualisations/boxplot_bill_length_distribution.R"), local = TRUE)$value
+source(file = here::here("scripts/boxplot_analysis/boxplot_bill_length_distribution.R"), local = TRUE)$value
 ```
 
 ## Summary statistics Analysis
@@ -209,13 +209,13 @@ Result Analysis
 
 </p>
 
-***mean vs median*** The mean is more heavily swayed by outliers than the median. Looking for the results obtained, there are a relatively small difference between the mean and median values per specie in bill_length_mm variable, what take us to think that the number of outliers are relatively small or even non-existent.
+***mean vs median*** The mean is more heavily swayed by outliers than the median. Looking at the results obtained, there is a relatively small difference between the mean and median values per species in the bill_length_mm variable which makes us think that the number of outliers is relatively small or even non-existent.
 
 **Skewness**
 
--   **Adelie:** skewness = 0.156, then the distribution of values in relation of asymmetry tends to be distorted the right. As the absolute skewness value is less than 0.5, the classification of skewness magnitude is classified as fairly symmetrical.
--   **Chinstrap:** skewness = -0.089, then tends to be distorted the left. Absolute value (=0.089) is less than 0.5 then the in relation to the magnitude is classified as fairly symmetrical. Mean value is lower than median as expected for centrality measures in a left skewness.
--   **Gentoo:** skewness = 0.604, then tends to be distorted the right. About the magnitude is classified as moderately skewed once the absolute value (=0.604) is between 0.5 and 1.
+-   **Adelie:** skewness = 0.156, then the distribution of values about asymmetry tends to be distorted to the right. As the absolute skewness value is less than 0.5, the skewness magnitude classification is fairly symmetrical.
+-   **Chinstrap:** skewness = -0.089, then tends to be distorted to the left. Absolute value (=0.089) is less than 0.5 then the about the magnitude is classified as fairly symmetrical. The mean value is lower than the median as expected for centrality measures in a left skewness.
+-   **Gentoo:** skewness = 0.604, then tends to be distorted to the right. The magnitude is classified as moderately skewed once the absolute value (=0.604) is between 0.5 and 1.
 
 **Standard deviation** (sd)
 
@@ -279,7 +279,7 @@ correlation %>%
   row_spec(0, background = "#FFF2CC", color = "black", extra_css = "padding-left:20px;") 
 ```
 
-How much closer the correlation coefficient (r) is to 1, stronger would be the linear relationship between two variables. Intermediate values indicate that variables tend to be related.
+How much closer the correlation coefficient (r) is to 1, stronger will be the linear relationship between two variables. Intermediate values indicate that variables tend to be related.
 
 -   **Null Correlation:** a correlation equal to 0 indicates no linear relationship between the two variables; the variables are independent.
 -   **Positive Correlation:** with a correlation of +1 the two random variables have a perfect positive linear relationship, therefore, a specific value of one variable, X, predicts the other variable, Y, exactly. The variables are positively dependent.
@@ -309,15 +309,28 @@ r_plot +
 ::: result_analysis
 <p class="title_result_analysis">
 
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, out.width="100%"}
+source(here::here("scripts/correlation_analysis/correlation_analysis_by_specie.R"), local = TRUE)$value
+```
+
+```{r}
+source(here::here("scripts/correlation_analysis/correlation_analysis_body.R"), local = TRUE)$value
+```
+
+
 Result Analysis
+
+
+
 
 </p>
 
 The length of the penguin's bill has a negative weak correlation with the depth of the bill (r = -0.24) and a strong positive and strong correlation with the length of the flipper (r = 0.66) and the weight (r = 0.6).
 
-Therefore, with a weak dependency (weak linear relationship), it is not reasonable to make predictions of the penguing's bill length through the bill depth.
+Therefore, with a weak dependency (weak linear relationship), it is not reasonable to make predictions of the penguin's bill length through the bill depth.
 
-On the other hand, we could look by the length of the flipper and the weight to predict the length of the penguin's bill, once both physical characteristics have a strong linear relationship with the bill´s length, reveling dependency from each other.
+On the other hand, we could look at the length of the flipper and the weight to predict the length of the penguin's bill, once both physical characteristics have a strong linear relationship with the bill´s length, revealing dependency from each other.
 :::
 
 <br>
