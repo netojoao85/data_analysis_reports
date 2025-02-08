@@ -1,7 +1,7 @@
 # Data Analysis Reports
  Reports with organized and summarised findings from data analysis results. 
 
-NYC citi bike
+NYC citi bike     
 A Report to provide business intelligence
 Created a report to provide Business Intelligence by using nyc_bikes dataset from the tsibbledata package. Find more about the dataset here.
 
